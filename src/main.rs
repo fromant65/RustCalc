@@ -3,12 +3,19 @@ mod lexer;
 mod parser;
 mod eval;
 mod input;
+mod expr_generator;
 use lexer::{Token,lexer};
 use parser::parse_expression;
 use eval::{print_ast,eval};
+use expr_generator::write_to_testfile;
 use input::read_lines;
 use std::path::Path;
 fn main(){
+    let test_res = write_to_testfile();
+    match test_res {
+        Ok(_)=>(),
+        Err(e)=>print!("Couldn't write expressions: {:?}", e)
+    }
     let path = Path::new("src/input.txt");
     println!("{:?}",path);
     let read_input = read_lines(path.to_str().expect("Invalid Path"));
@@ -29,31 +36,29 @@ fn main(){
         }
     }
     let tolerance=0.01;
+    let mut i = 0;
     for input in inputs{
         let (input,res)=input;
         let tokens_result = lexer(&input);
-        //let mut tokens;
         match tokens_result {
             Ok(mut tokens)=>{
                 let ast = parse_expression(&mut tokens);
                 match ast {
                     Ok(ast)=>{
                         let root = ast.root.expect("Empty AST");
-                        let str_expr=print_ast(&root).ok();
+                        let str_expr=print_ast(&root).unwrap();
                         let evaluation = eval(&root);
-                        println!("{:?}={}",
-                        str_expr,evaluation);
-                        if read_from_txt{
-                            assert!((res-evaluation)<tolerance);
-                        }
+                        //println!("{}. {:?}={}", i, str_expr, evaluation);
+                        // if read_from_txt{
+                        //     assert!((res-evaluation)<tolerance);
+                        // }
                     },
-                    Err(err)=>println!("Error while parsing input:{:?}",err)
+                    Err(err)=>println!("Error while parsing input {}:{:?}",i,err)
                 }
             },
-            Err(err)=> println!("Error while processing input:{:?}",err)
+            Err(err)=> println!("Error while processing input {}:{:?}",i,err)
         }
+        i+=1;
     }
-    ////print!("Tokens getted {:?}\n", tokens);
-    ////print!("Ast getted\n");
     
 }

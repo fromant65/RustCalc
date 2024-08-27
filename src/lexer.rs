@@ -41,14 +41,14 @@ fn push_number_and_token(token:Token, tokens:&mut Vec<Token>, buffer:&mut String
     if token==Token::Minus(()){
         let last_token = tokens.pop();
         match last_token {
-            Some(Token::Number(_))=>{
+            Some(Token::Number(_))|Some(Token::CloseExp(()))=>{
                 tokens.push(last_token.unwrap());
                 tokens.push(Token::Plus(()));
             },
             None=>(),
             _=>tokens.push(last_token.unwrap())
         }
-        print!("{:?}", tokens);
+        //print!("{:?}", tokens);
     }
     tokens.push(token);
 }
